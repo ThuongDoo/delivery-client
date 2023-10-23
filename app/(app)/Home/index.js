@@ -4,9 +4,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import logo from "../../../assets/logo.jpg";
 import { TextInput } from "react-native-gesture-handler";
 import { Entypo } from "@expo/vector-icons";
-import Category from "../../../components/Category";
 import Feature from "../../../components/Feature";
 import { Link, Stack } from "expo-router";
+import CategoryRow from "../../../components/CategoryRow";
+import { useSelector } from "react-redux";
+import { getUser } from "../../../slices/userSlice";
 const Home = () => {
   return (
     <View>
@@ -22,7 +24,7 @@ const Home = () => {
         showsVerticalScrollIndicator={false}
         className="mx-3"
       >
-        <Category />
+        <CategoryRow />
         <Feature />
       </ScrollView>
     </View>

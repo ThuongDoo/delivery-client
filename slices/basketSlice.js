@@ -9,30 +9,45 @@ export const basketSlice = createSlice({
   initialState,
   reducers: {
     addToBasket: (state, action) => {
-      state.items = [...state.items, action.payload];
-    },
-    removeFromBasket: (state, action) => {
-      const index = state.items.findIndex(
+      const existingItem = state.items.find(
         (item) => item._id === action.payload._id
       );
-      let newBasket = [...state.items];
-      if (index >= 0) {
-        newBasket.splice(index, 1);
+      if (existingItem) {
+        existingItem.quantity += 1;
       } else {
-        console.warn(
-          `Can't remove product (id: ${action.payload._id} as it's not in basket!)`
-        );
+        state.items.push({ ...action.payload, quantity: 1 });
       }
-      state.items = newBasket;
+    },
+    removeFromBasket: (state, action) => {
+      const existingItemIndex = state.items.findIndex(
+        (item) => item._id === action.payload._id
+      );
+      if (existingItemIndex != -1) {
+        if (state.items[existingItemIndex].quantity > 0) {
+          state.items[existingItemIndex].quantity -= 1;
+        }
+        if (state.items[existingItemIndex].quantity === 0) {
+          state.items.splice(existingItemIndex, 1);
+        }
+      }
+    },
+    resetBasket: (state) => {
+      state.items = [];
     },
   },
 });
 
-export const { addToBasket, removeFromBasket } = basketSlice.actions;
+export const { addToBasket, removeFromBasket, resetBasket } =
+  basketSlice.actions;
 export const selectBasketItemById = (state, _id) =>
   state.basket.items.filter((item) => item._id === _id);
 export const selectBasketItem = (state) => state.basket.items;
 export const selectBasketTotal = (state) =>
-  state.basket.items.reduce((total, item) => (total += item.price), 0);
-
+  state.basket.items.reduce(
+    (total, item) => (total += item.price * item.quantity),
+    0
+  );
+export const selectBasketQuantity = (state) =>
+  state.basket.items.reduce((quantity, item) => (quantity += item.quantity), 0);
+export const selectBasket = (state) => state.basket.items;
 export default basketSlice.reducer;

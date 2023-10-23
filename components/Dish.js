@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   addToBasket,
   removeFromBasket,
-  selectBasketItem,
   selectBasketItemById,
 } from "../slices/basketSlice";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -13,13 +12,18 @@ import CurrencyFormatter from "./CurrencyFormatter";
 import { iconColor } from "../utils/constants";
 
 const Dish = ({ _id, name, image, description, price }) => {
-  const items = useSelector((state) => selectBasketItemById(state, _id));
+  const item = useSelector((state) => selectBasketItemById(state, _id));
   const dispatch = useDispatch();
   const addItemToBasket = () => {
-    dispatch(addToBasket({ _id, name, image, description, price }));
+    dispatch(
+      addToBasket({
+        _id,
+        price,
+      })
+    );
   };
   const removeItemFromBasket = () => {
-    if (!items.length > 0) return;
+    if (!item.length > 0) return;
     dispatch(removeFromBasket({ _id }));
   };
   return (
@@ -32,16 +36,16 @@ const Dish = ({ _id, name, image, description, price }) => {
         </Text>
         <View className="flex-row justify-between w-20 items-center">
           <TouchableOpacity
-            disabled={!items.length}
+            disabled={!item.length}
             onPress={removeItemFromBasket}
           >
             <Entypo
               name="circle-with-minus"
               size={30}
-              color={items.length ? iconColor : "gray"}
+              color={item.length ? iconColor : "gray"}
             />
           </TouchableOpacity>
-          <Text>{items.length}</Text>
+          <Text>{item[0]?.quantity || 0}</Text>
           <TouchableOpacity onPress={addItemToBasket}>
             <Entypo name="circle-with-plus" size={30} color={iconColor} />
           </TouchableOpacity>

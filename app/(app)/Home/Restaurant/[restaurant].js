@@ -1,36 +1,29 @@
-import { View, Text, Image, ScrollView, Button } from "react-native";
+import { View, Text, Image, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
-import {
-  Link,
-  Stack,
-  router,
-  useGlobalSearchParams,
-  useLocalSearchParams,
-} from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
-import api from "../../../utils/api";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  selectRestaurant,
-  setRestaurant,
-} from "../../../slices/restaurantSlice";
-import Dish from "../../../components/Dish";
-import { setError } from "../../../slices/errorSlice";
-import BasketIcon from "../../../components/BasketIcon";
+import api from "../../../../utils/api";
+import { useDispatch } from "react-redux";
+import Dish from "../../../../components/Dish";
+import { setError } from "../../../../slices/errorSlice";
+import BasketIcon from "../../../../components/BasketIcon";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { iconColor } from "../../../utils/constants";
+import { iconColor } from "../../../../utils/constants";
 
 const Restaurant = () => {
   const local = useLocalSearchParams();
   const dispatch = useDispatch();
-  const restaurant = useSelector(selectRestaurant);
+  const [restaurant, setRestaurant] = useState("");
+  console.log("ha");
   useEffect(() => {
     const fetchData = async () => {
       await api
         .get(`/restaurant/${local.restaurant}`)
-        .then((res) => dispatch(setRestaurant(res.data.restaurant)))
+        .then((res) => {
+          setRestaurant(res.data.restaurant);
+        })
         .catch((err) => {
           {
             err?.response && dispatch(setError(err.response.status));
@@ -39,7 +32,7 @@ const Restaurant = () => {
     };
     fetchData();
   }, []);
-
+  console.log("ha");
   return (
     <View>
       <View className="z-50 top-9 h-20 ">
@@ -104,16 +97,18 @@ const Restaurant = () => {
             </View>
             <Text>{restaurant.description}</Text>
             <Text>Recommended</Text>
-            {restaurant.food?.map((food, index) => (
-              <Dish
-                key={index}
-                _id={food._id}
-                name={food.name}
-                image={food.image}
-                description={food.description}
-                price={food.price}
-              />
-            ))}
+            <View>
+              {restaurant.food?.map((item) => (
+                <Dish
+                  _id={item._id}
+                  name={item.name}
+                  image={item.image}
+                  description={item.description}
+                  price={item.price}
+                  restaurantId={restaurant._id}
+                />
+              ))}
+            </View>
           </View>
         </View>
       </ScrollView>

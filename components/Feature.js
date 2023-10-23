@@ -1,9 +1,10 @@
 import { View, Text, Image, ScrollView, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
 import api from "../utils/api";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { selectError, setError } from "../slices/errorSlice";
 import { useDispatch } from "react-redux";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const Feature = () => {
   const [feature, setFeature] = useState([]);
@@ -35,23 +36,22 @@ const Feature = () => {
               className="h-56 w-80 rounded-3xl"
             />
             {item.restaurant?.map((restaurant) => (
-              <Link
+              <TouchableOpacity
                 key={restaurant._id}
-                href={{
-                  pathname: "/Home/[restaurant]",
-                  params: {
-                    restaurant: restaurant._id,
-                  },
+                onPress={() => {
+                  router.push({
+                    pathname: "/Home/Restaurant/[restaurant]",
+                    params: {
+                      restaurant: restaurant._id,
+                    },
+                  });
                 }}
-                asChild
               >
-                <Pressable>
-                  <Image
-                    source={{ uri: restaurant.image }}
-                    className="h-56 w-80 rounded-3xl"
-                  />
-                </Pressable>
-              </Link>
+                <Image
+                  source={{ uri: restaurant.image }}
+                  className="h-56 w-80 rounded-3xl"
+                />
+              </TouchableOpacity>
             ))}
           </ScrollView>
         </View>

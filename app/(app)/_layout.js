@@ -1,16 +1,37 @@
 import { Tabs, router } from "expo-router";
 import { View, Text, Button } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
-import { selectError } from "../../slices/errorSlice";
-import { useSelector } from "react-redux";
+import { selectError, setError } from "../../slices/errorSlice";
+import { useDispatch, useSelector } from "react-redux";
 import { removeAuthToken } from "../../utils/auth";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import api from "../../utils/api";
+import { setUser } from "../../slices/userSlice";
 const AppLayout = () => {
   const error = useSelector(selectError);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    const fetchData = async () => {
+      await api
+        .get("/user/showMe")
+        .then((res) => {
+          dispatch(setUser(res.data.user));
+        })
+        .catch((err) => {
+          throw new Error(err.message);
+        });
+    };
+    fetchData();
+  }, []);
+
   if (error.error === 401) {
+    console.log("error");
     removeAuthToken();
+    dispatch(setError(null));
     return router.replace("/");
+  } else if (error.error) {
+    console.log("ERROR");
   }
   return (
     <Tabs
@@ -44,6 +65,8 @@ const AppLayout = () => {
               color={focused ? "red" : "black"}
             />
           ),
+          tabBarLabel: "Basket",
+          title: "Your Basket",
           headerShown: true,
           headerStyle: {
             backgroundColor: "#f4511e",
@@ -52,7 +75,6 @@ const AppLayout = () => {
           headerTitleStyle: {
             fontWeight: "bold",
           },
-          title: "Your Basket",
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => {

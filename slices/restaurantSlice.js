@@ -45,5 +45,7 @@ export const restaurantSlice = createSlice({
 export const { setRestaurant } = restaurantSlice.actions;
 
 export const selectRestaurant = (state) => state.restaurant;
+// export const selectRestaurantById = (state, _id) =>
+//   state.restaurant.filter((item) => item._id === _id);
 
 export default restaurantSlice.reducer;

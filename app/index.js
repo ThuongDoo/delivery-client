@@ -6,6 +6,8 @@ import api from "../utils/api";
 import * as Yup from "yup";
 import * as AuthRequire from "../utils/auth";
 import { router } from "expo-router";
+import { useDispatch } from "react-redux";
+import { setUser } from "../slices/userSlice";
 
 const index = () => {
   AuthRequire.checkAuthToken();

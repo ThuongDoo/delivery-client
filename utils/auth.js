@@ -12,6 +12,7 @@ export const saveAuthToken = async (token) => {
 };
 
 export const checkAuthToken = async () => {
+  console.log("hu");
   try {
     const authToken = await AsyncStorage.getItem("authToken");
     if (authToken) {
