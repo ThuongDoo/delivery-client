@@ -1,6 +1,6 @@
 import { View, Text, Image, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -11,30 +11,67 @@ import { setError } from "../../../../slices/errorSlice";
 import BasketIcon from "../../../../components/BasketIcon";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { iconColor } from "../../../../utils/constants";
+import Toast from "react-native-root-toast";
 
 const Restaurant = () => {
+  // const [popUpVisible, setPopUpVisible] = useState(false);
   const local = useLocalSearchParams();
   const dispatch = useDispatch();
   const [restaurant, setRestaurant] = useState("");
-  console.log("ha");
-  useEffect(() => {
-    const fetchData = async () => {
-      await api
-        .get(`/restaurant/${local.restaurant}`)
-        .then((res) => {
-          setRestaurant(res.data.restaurant);
-        })
-        .catch((err) => {
-          {
-            err?.response && dispatch(setError(err.response.status));
-          }
-        });
-    };
-    fetchData();
-  }, []);
-  console.log("ha");
+  const [items, setItems] = useState([]);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        await api
+          .get(`/restaurant/${local.restaurant}`)
+          .then((res) => {
+            setRestaurant(res.data.restaurant);
+            const foodItem = res.data.restaurant.food.map((item) => ({
+              _id: item._id,
+              name: item.name,
+              image: item.image,
+              description: item.description,
+              price: item.price,
+              quantity: 0,
+            }));
+            setItems(foodItem);
+            setIsDataLoaded(true);
+          })
+          .catch((err) => {
+            {
+              err?.response && dispatch(setError(err.response.status));
+            }
+          });
+      };
+      fetchData();
+    }, [local.restaurant])
+  );
+  const onChange = (value) => {
+    if (isDataLoaded) {
+      const UpdateItems = items.map((item) => {
+        if (item._id === value._id) {
+          return { ...item, quantity: value.quantity };
+        }
+        return item;
+      });
+      setItems(UpdateItems);
+    }
+  };
+  const resetData = (value) => {
+    const UpdateItems = items.map((item) => ({
+      ...item,
+      quantity: 0,
+    }));
+    setItems(UpdateItems);
+    // setPopUpVisible(true);
+    // setTimeout(() => {
+    //   setPopUpVisible(false);
+    // }, 1000);
+  };
+
   return (
-    <View>
+    <View className="h-full">
       <View className="z-50 top-9 h-20 ">
         <TouchableOpacity
           onPress={() => {
@@ -49,10 +86,13 @@ const Restaurant = () => {
         source={{ uri: restaurant.image }}
         className="w-full h-52 absolute"
       />
-      <BasketIcon />
+      <BasketIcon data={items} reset={resetData} />
+      {/* <Toast visible={popUpVisible} position={0}>
+        Succesfull!
+      </Toast> */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 150 }}
+        contentContainerStyle={{ paddingBottom: 80 }}
         className=""
       >
         <View className=" mx-5 ">
@@ -98,14 +138,16 @@ const Restaurant = () => {
             <Text>{restaurant.description}</Text>
             <Text>Recommended</Text>
             <View>
-              {restaurant.food?.map((item) => (
+              {items?.map((item) => (
                 <Dish
+                  key={item._id}
                   _id={item._id}
                   name={item.name}
                   image={item.image}
                   description={item.description}
                   price={item.price}
-                  restaurantId={restaurant._id}
+                  onChange={onChange}
+                  quantity={item.quantity}
                 />
               ))}
             </View>

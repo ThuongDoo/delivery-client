@@ -1,5 +1,5 @@
 import { View, Text, Image } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Entypo } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -11,20 +11,25 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import CurrencyFormatter from "./CurrencyFormatter";
 import { iconColor } from "../utils/constants";
 
-const Dish = ({ _id, name, image, description, price }) => {
-  const item = useSelector((state) => selectBasketItemById(state, _id));
-  const dispatch = useDispatch();
+const Dish = ({ _id, name, image, description, price, quantity, onChange }) => {
+  const [loading, setLoading] = useState(false);
   const addItemToBasket = () => {
-    dispatch(
-      addToBasket({
-        _id,
-        price,
-      })
-    );
+    if (loading) {
+      return;
+    }
+    setLoading(true);
+    onChange({ _id, quantity: quantity + 1 });
+
+    setLoading(false);
   };
   const removeItemFromBasket = () => {
-    if (!item.length > 0) return;
-    dispatch(removeFromBasket({ _id }));
+    if (!quantity > 0 || loading) {
+      return;
+    }
+    setLoading(true);
+    onChange({ _id, quantity: quantity - 1 });
+
+    setLoading(false);
   };
   return (
     <View className="flex-row items-center justify-between gap-2S border-b border-t border-gray-200 h-32 py-3">
@@ -36,16 +41,16 @@ const Dish = ({ _id, name, image, description, price }) => {
         </Text>
         <View className="flex-row justify-between w-20 items-center">
           <TouchableOpacity
-            disabled={!item.length}
+            disabled={quantity <= 0}
             onPress={removeItemFromBasket}
           >
             <Entypo
               name="circle-with-minus"
               size={30}
-              color={item.length ? iconColor : "gray"}
+              color={quantity > 0 ? iconColor : "gray"}
             />
           </TouchableOpacity>
-          <Text>{item[0]?.quantity || 0}</Text>
+          <Text>{quantity}</Text>
           <TouchableOpacity onPress={addItemToBasket}>
             <Entypo name="circle-with-plus" size={30} color={iconColor} />
           </TouchableOpacity>

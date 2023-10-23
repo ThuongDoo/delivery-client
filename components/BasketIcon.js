@@ -15,26 +15,36 @@ import { router } from "expo-router";
 import api from "../utils/api";
 import { getUser } from "../slices/userSlice";
 
-const BasketIcon = () => {
-  const basketTotal = useSelector(selectBasketTotal);
-  const basketQuantity = useSelector(selectBasketQuantity);
-  const basket = useSelector(selectBasket);
-  const dispatch = useDispatch();
+const BasketIcon = ({ data, reset }) => {
   const user = useSelector(getUser);
+  const [basketQuantity, setBasketQuantity] = useState(0);
+  const [basketTotalPrice, setBasketTotalPrice] = useState(0);
+  useEffect(() => {
+    const updateQuantity = data.reduce((total, item) => {
+      return (total += item.quantity);
+    }, 0);
+    setBasketQuantity(updateQuantity);
+  }, [data]);
+  useEffect(() => {
+    const updateTotalPrice = data.reduce((total, item) => {
+      return (total += item.quantity * item.price);
+    }, 0);
+    setBasketTotalPrice(updateTotalPrice);
+  }, [data]);
   const onSubmit = async () => {
-    const items = basket.map((item) => {
-      const { price, ...rest } = item;
-      return rest;
-    });
-    const newBasket = { userId: user.userId, items: items };
-    console.log(newBasket);
-    await api.patch("/basket", newBasket);
-    dispatch(resetBasket());
+    const filterItems = data.filter((item) => item.quantity !== 0);
+    const items = filterItems.map((item) => ({
+      _id: item._id,
+      quantity: item.quantity,
+    }));
+    const value = { userId: user.userId, items };
+    await api.patch("/basket", value);
+    reset(1);
   };
 
-  if (basketQuantity === 0) return null;
+  if (basketQuantity === 0) return;
   return (
-    <View className="absolute w-full z-50 bottom-24 left-0 right-0 ">
+    <View className="absolute w-full z-50 bottom-2 left-0 right-0 ">
       <TouchableOpacity
         onPress={onSubmit}
         className="bg-customRed flex-row rounded-lg space-x-1 items-center mx-5 p-4"
@@ -46,7 +56,7 @@ const BasketIcon = () => {
           Add to basket
         </Text>
         <Text className="text-lg text-white font-extrabold text-right basis-1/4">
-          {CurrencyFormatter({ amount: basketTotal })}
+          {CurrencyFormatter({ amount: basketTotalPrice })}
         </Text>
       </TouchableOpacity>
     </View>

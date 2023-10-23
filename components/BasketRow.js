@@ -6,7 +6,7 @@ import CurrencyFormatter from "./CurrencyFormatter";
 import api from "../utils/api";
 import { Feather } from "@expo/vector-icons";
 
-const BasketRow = ({ data, userId, total }) => {
+const BasketRow = ({ data, userId, total, itemDelete }) => {
   const [quantity, setQuantity] = useState(data.quantity);
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
@@ -16,7 +16,6 @@ const BasketRow = ({ data, userId, total }) => {
     }
     setLoading(true);
     setQuantity(quantity - 1);
-    total(20);
     const value = {
       userId,
       items: [{ _id: data.food._id, quantity: -1 }],
@@ -31,7 +30,6 @@ const BasketRow = ({ data, userId, total }) => {
     }
     setLoading(true);
     setQuantity(quantity + 1);
-    // total(quantity);
     const value = {
       userId,
       items: [{ _id: data.food._id, quantity: 1 }],
@@ -42,9 +40,17 @@ const BasketRow = ({ data, userId, total }) => {
   };
   const deleteItem = async () => {
     setIsDelete(true);
+    itemDelete(data.food._id);
     const value = { userId, items: [data.food._id] };
     const res = await api.delete("/basket", { data: value });
   };
+  useEffect(() => {
+    total({ _id: data.food._id, quantity });
+  }, [quantity]);
+  useEffect(() => {
+    setQuantity(data.quantity);
+  }, [data.quantity]);
+
   if (isDelete) return;
   return (
     <View className="flex-row items-center border-b border-t border-gray-200 h-32 gap-x-3">
