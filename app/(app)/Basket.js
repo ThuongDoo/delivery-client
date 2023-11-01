@@ -21,7 +21,9 @@ const Basket = () => {
       const fetchData = async () => {
         api
           .get(`/basket/${user.userId}`)
-          .then((res) => setBasket(res.data.items))
+          .then((res) => {
+            setBasket(res.data.items);
+          })
           .catch((err) => {
             throw new Error(err.message);
           });
@@ -70,13 +72,13 @@ const Basket = () => {
     <View className="h-full">
       <TouchableOpacity className="px-3 bg-customRed absolute bottom-2 left-0 right-0 z-50 flex-row rounded-lg space-x-1 items-center mx-5 py-4">
         <Text className="text-lg font-extrabold text-white basis-1/4">
-          {basketQuantity}
-        </Text>
-        <Text className="text-lg text-white font-extrabold text-center flex-1">
           Order
         </Text>
-        <Text className="text-lg text-white font-extrabold text-right basis-1/4">
+        <Text className="text-lg text-white font-extrabold text-center flex-1">
           {CurrencyFormatter({ amount: basketTotalPrice })}
+        </Text>
+        <Text className="text-lg text-white font-extrabold text-right basis-1/4">
+          {basketQuantity}
         </Text>
       </TouchableOpacity>
       <ScrollView className="px-3">

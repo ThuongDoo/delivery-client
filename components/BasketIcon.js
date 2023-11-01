@@ -34,11 +34,12 @@ const BasketIcon = ({ data, reset }) => {
   const onSubmit = async () => {
     const filterItems = data.filter((item) => item.quantity !== 0);
     const items = filterItems.map((item) => ({
-      _id: item._id,
+      food: item._id,
       quantity: item.quantity,
     }));
     const value = { userId: user.userId, items };
-    await api.patch("/basket", value);
+    console.log("basket");
+    await api.patch(`/basket/${user.userId}`, value);
     reset(1);
   };
 
@@ -49,14 +50,12 @@ const BasketIcon = ({ data, reset }) => {
         onPress={onSubmit}
         className="bg-customRed flex-row rounded-lg space-x-1 items-center mx-5 p-4"
       >
-        <Text className="text-lg font-extrabold text-white basis-1/4">
-          {basketQuantity}
-        </Text>
+        <Text className="text-lg font-extrabold text-white basis-1/5">Add</Text>
         <Text className="text-lg text-white font-extrabold text-center flex-1">
-          Add to basket
-        </Text>
-        <Text className="text-lg text-white font-extrabold text-right basis-1/4">
           {CurrencyFormatter({ amount: basketTotalPrice })}
+        </Text>
+        <Text className="text-lg text-white font-extrabold text-right basis-1/5">
+          {basketQuantity}
         </Text>
       </TouchableOpacity>
     </View>

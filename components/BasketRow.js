@@ -18,7 +18,7 @@ const BasketRow = ({ data, userId, total, itemDelete }) => {
     setQuantity(quantity - 1);
     const value = {
       userId,
-      items: [{ _id: data.food._id, quantity: -1 }],
+      items: [{ food: data.food._id, quantity: -1 }],
     };
     await api.patch("/basket", value).finally(function () {
       setLoading(false);
@@ -31,18 +31,17 @@ const BasketRow = ({ data, userId, total, itemDelete }) => {
     setLoading(true);
     setQuantity(quantity + 1);
     const value = {
-      userId,
-      items: [{ _id: data.food._id, quantity: 1 }],
+      items: [{ food: data.food._id, quantity: 1 }],
     };
-    await api.patch("/basket", value).finally(function () {
+    await api.patch(`/basket/${userId}`, value).finally(function () {
       setLoading(false);
     });
   };
   const deleteItem = async () => {
     setIsDelete(true);
     itemDelete(data.food._id);
-    const value = { userId, items: [data.food._id] };
-    const res = await api.delete("/basket", { data: value });
+    const value = { userId, food: data.food._id };
+    const res = await api.patch(`/basket/${userId}/${data.food._id}`);
   };
   useEffect(() => {
     total({ _id: data.food._id, quantity });

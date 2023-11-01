@@ -87,9 +87,6 @@ const Restaurant = () => {
         className="w-full h-52 absolute"
       />
       <BasketIcon data={items} reset={resetData} />
-      {/* <Toast visible={popUpVisible} position={0}>
-        Succesfull!
-      </Toast> */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 80 }}
