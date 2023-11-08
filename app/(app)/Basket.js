@@ -15,6 +15,7 @@ const Basket = () => {
   const [basket, setBasket] = useState([]);
   const [basketQuantity, setBasketQuantity] = useState(0);
   const [basketTotalPrice, setBasketTotalPrice] = useState(0);
+  const [restaurant, setRestaurant] = useState([]);
   const user = useSelector(getUser);
   useFocusEffect(
     React.useCallback(() => {
@@ -22,7 +23,16 @@ const Basket = () => {
         api
           .get(`/basket/${user.userId}`)
           .then((res) => {
+            console.log(res.data.items);
             setBasket(res.data.items);
+            const tempRestaurant = res.data.items.map(
+              (item) => item.food.restaurant
+            );
+
+            const uniqueRestaurant = [
+              ...new Set(tempRestaurant.map((item) => item._id)),
+            ].map((id) => tempRestaurant.find((item) => item._id === id));
+            setRestaurant(uniqueRestaurant);
           })
           .catch((err) => {
             throw new Error(err.message);
@@ -31,6 +41,8 @@ const Basket = () => {
       fetchData();
     }, [useId])
   );
+  // console.log(basket);
+  console.log(restaurant);
 
   const onChange = (value) => {
     const updateBasket = basket.map((item) => {
@@ -70,26 +82,45 @@ const Basket = () => {
 
   return (
     <View className="h-full">
-      <TouchableOpacity className="px-3 bg-customRed absolute bottom-2 left-0 right-0 z-50 flex-row rounded-lg space-x-1 items-center mx-5 py-4">
-        <Text className="text-lg font-extrabold text-white basis-1/4">
-          Order
-        </Text>
-        <Text className="text-lg text-white font-extrabold text-center flex-1">
-          {CurrencyFormatter({ amount: basketTotalPrice })}
-        </Text>
-        <Text className="text-lg text-white font-extrabold text-right basis-1/4">
-          {basketQuantity}
-        </Text>
-      </TouchableOpacity>
-      <ScrollView className="px-3">
-        {basket?.map((item) => (
-          <BasketRow
-            key={item._id}
-            data={item}
-            userId={user.userId}
-            total={onChange}
-            itemDelete={handleDelete}
-          />
+      {basketQuantity !== 0 && (
+        <TouchableOpacity className="px-3 bg-customRed absolute bottom-2 left-0 right-0 z-50 flex-row rounded-lg space-x-1 items-center mx-5 py-4">
+          <Text className="text-lg font-extrabold text-white basis-1/4">
+            Order
+          </Text>
+          <Text className="text-lg text-white font-extrabold text-center flex-1">
+            {CurrencyFormatter({ amount: basketTotalPrice })}
+          </Text>
+          <Text className="text-lg text-white font-extrabold text-right basis-1/4">
+            {basketQuantity}
+          </Text>
+        </TouchableOpacity>
+      )}
+      <ScrollView
+        className="px-3"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 80 }}
+      >
+        {restaurant?.map((restaurantItem) => (
+          <View key={restaurantItem._id}>
+            <View className="flex-row items-center space-x-2 py-2 border-b">
+              <Image
+                source={{ uri: restaurantItem.image }}
+                className="w-7 h-7"
+              />
+              <Text>{restaurantItem.name}</Text>
+            </View>
+            {basket
+              .filter((item) => item.food.restaurant._id === restaurantItem._id)
+              .map((filteredItem) => (
+                <BasketRow
+                  key={filteredItem._id}
+                  data={filteredItem}
+                  userId={user.userId}
+                  total={onChange}
+                  itemDelete={handleDelete}
+                />
+              ))}
+          </View>
         ))}
       </ScrollView>
     </View>

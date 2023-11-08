@@ -9,16 +9,11 @@ import { Link, Stack } from "expo-router";
 import CategoryRow from "../../../components/CategoryRow";
 import { useSelector } from "react-redux";
 import { getUser } from "../../../slices/userSlice";
+import Header from "../../../components/Header";
 const Home = () => {
   return (
     <View>
-      <View className="flex-row justify-between pb-3 px-3 pt-10 space-x-3 bg-customRed">
-        <View className="flex-row items-center bg-white rounded-full px-3 flex-1">
-          <Entypo name="magnifying-glass" size={24} color="black" />
-          <TextInput placeholder="Restaurants and Cuisines" />
-        </View>
-        <Image source={logo} className="w-10 h-10 rounded-full" />
-      </View>
+      <Header />
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
