@@ -1,8 +1,8 @@
-import { View, Text, Image, ScrollView, Pressable } from "react-native";
+import { View, Text, Image, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import api from "../utils/api";
-import { Link, router } from "expo-router";
-import { selectError, setError } from "../slices/errorSlice";
+import { router } from "expo-router";
+import { setError } from "../slices/errorSlice";
 import { useDispatch } from "react-redux";
 import { TouchableOpacity } from "react-native-gesture-handler";
 

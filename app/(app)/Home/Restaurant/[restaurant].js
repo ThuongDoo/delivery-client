@@ -11,7 +11,6 @@ import { setError } from "../../../../slices/errorSlice";
 import BasketIcon from "../../../../components/BasketIcon";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { iconColor } from "../../../../utils/constants";
-import Toast from "react-native-root-toast";
 
 const Restaurant = () => {
   // const [popUpVisible, setPopUpVisible] = useState(false);

@@ -1,12 +1,6 @@
 import { View, Text, Image } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Entypo } from "@expo/vector-icons";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  addToBasket,
-  removeFromBasket,
-  selectBasketItemById,
-} from "../slices/basketSlice";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import CurrencyFormatter from "./CurrencyFormatter";
 import { iconColor } from "../utils/constants";

@@ -1,17 +1,8 @@
 import { View, Text } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  selectBasket,
-  selectBasketItem,
-  selectBasketQuantity,
-  selectBasketTotal,
-  resetBasket,
-} from "../slices/basketSlice";
-import { formatCurrency } from "react-native-format-currency";
+import { useSelector } from "react-redux";
 import CurrencyFormatter from "./CurrencyFormatter";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { router } from "expo-router";
 import api from "../utils/api";
 import { getUser } from "../slices/userSlice";
 

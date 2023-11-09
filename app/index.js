@@ -1,13 +1,11 @@
 import { View, Text, Image, Button } from "react-native";
 import React from "react";
-import { ErrorMessage, Formik } from "formik";
+import { Formik } from "formik";
 import { TextInput } from "react-native-gesture-handler";
 import api from "../utils/api";
 import * as Yup from "yup";
 import * as AuthRequire from "../utils/auth";
 import { router } from "expo-router";
-import { useDispatch } from "react-redux";
-import { setUser } from "../slices/userSlice";
 
 const index = () => {
   AuthRequire.checkAuthToken();

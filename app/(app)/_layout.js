@@ -1,11 +1,9 @@
 import { Tabs, router } from "expo-router";
-import { View, Text, Button } from "react-native";
-import React, { useEffect, useState } from "react";
-import { Entypo, FontAwesome, Ionicons } from "@expo/vector-icons";
+import React, { useEffect } from "react";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { selectError, setError } from "../../slices/errorSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { removeAuthToken } from "../../utils/auth";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import api from "../../utils/api";
 import { setUser } from "../../slices/userSlice";
 const AppLayout = () => {
@@ -66,25 +64,6 @@ const AppLayout = () => {
             />
           ),
           tabBarLabel: "Basket",
-          title: "Your Basket",
-          headerShown: true,
-          headerStyle: {
-            backgroundColor: "#f4511e",
-          },
-          headerTintColor: "#fff",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                router.back();
-              }}
-              className="px-3"
-            >
-              <Ionicons name="arrow-back" size={30} color="white" />
-            </TouchableOpacity>
-          ),
         }}
       />
       <Tabs.Screen

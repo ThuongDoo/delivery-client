@@ -4,27 +4,25 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  Button,
+  Modal,
 } from "react-native";
 import React, { useEffect, useId, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { selectBasketItem, selectBasketTotal } from "../../slices/basketSlice";
-import { selectRestaurant } from "../../slices/restaurantSlice";
-import BasketRow from "../../components/BasketRow";
-import api from "../../utils/api";
-import { getUser } from "../../slices/userSlice";
-import CurrencyFormatter from "../../components/CurrencyFormatter";
-import { Entypo } from "@expo/vector-icons";
-import { iconColor } from "../../utils/constants";
+import { useSelector } from "react-redux";
+import BasketRow from "../../../components/BasketRow";
+import api from "../../../utils/api";
+import { getUser } from "../../../slices/userSlice";
+import CurrencyFormatter from "../../../components/CurrencyFormatter";
 import { useFocusEffect } from "expo-router";
-import { Field, Form, Formik } from "formik";
-import { CheckBox } from "@rneui/themed";
-
+import { Formik } from "formik";
+import LoadingModal from "../../../components/LoadingModal";
+import ModalLoader from "react-native-modal-loader";
 const Basket = () => {
   const [basket, setBasket] = useState([]);
   const [basketQuantity, setBasketQuantity] = useState(0);
   const [basketTotalPrice, setBasketTotalPrice] = useState(0);
   const [restaurant, setRestaurant] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const shippingFee = 15000;
   const user = useSelector(getUser);
   useFocusEffect(
     React.useCallback(() => {
@@ -75,6 +73,7 @@ const Basket = () => {
     updateBasket.splice(deleteIndex, 1);
     setBasket(updateBasket);
   };
+
   useEffect(() => {
     const quantity = basket.reduce((total, item) => {
       return (total += item.quantity);
@@ -91,37 +90,62 @@ const Basket = () => {
 
   return (
     <Formik
-      initialValues={{ isChecked: [] }}
+      initialValues={{ isChecked: {} }}
       onSubmit={(values) => {
-        // console.log(values.isChecked);
+        console.log(values.isChecked);
         const checkedFoods = Object.keys(values.isChecked).filter(
           (key) => values.isChecked[key] === true
         );
         console.log(checkedFoods);
+        // router.push("Basket/Payment");
+        setIsLoading(true);
+        console.log(basket);
       }}
     >
-      {({ values, handleChange, setFieldValue, handleSubmit }) => (
+      {({ values, setFieldValue, handleSubmit }) => (
         <View className="h-full">
+          <ModalLoader loading={false} />
+
           {basketQuantity !== 0 && (
-            <TouchableOpacity
-              className="px-3 bg-customRed absolute bottom-2 left-0 right-0 z-50 flex-row rounded-lg space-x-1 items-center mx-5 py-4"
-              onPress={handleSubmit}
-            >
-              <Text className="text-lg font-extrabold text-white basis-1/4">
-                Order
-              </Text>
-              <Text className="text-lg text-white font-extrabold text-center flex-1">
-                {CurrencyFormatter({ amount: basketTotalPrice })}
-              </Text>
-              <Text className="text-lg text-white font-extrabold text-right basis-1/4">
-                {basketQuantity}
-              </Text>
-            </TouchableOpacity>
+            <View className="mx-3 bg-white absolute bottom-2 left-0 right-0 z-50 h-32 rounded-md">
+              <View className="mx-2">
+                <View className="flex-row justify-between">
+                  <Text>Subtotal</Text>
+                  <Text>{CurrencyFormatter({ amount: basketTotalPrice })}</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text>Shipping fee</Text>
+                  <Text>{CurrencyFormatter({ amount: shippingFee })}</Text>
+                </View>
+                <View className="flex-row justify-between">
+                  <Text>Total</Text>
+                  <Text>
+                    {CurrencyFormatter({
+                      amount: basketTotalPrice + shippingFee,
+                    })}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                className="px-3 bg-customRed flex-row rounded-lg space-x-1 items-center py-4 mx-2"
+                onPress={handleSubmit}
+              >
+                <Text className="text-lg font-extrabold text-white basis-1/4">
+                  Order
+                </Text>
+                <Text className="text-lg text-white font-extrabold text-center flex-1">
+                  {CurrencyFormatter({ amount: basketTotalPrice })}
+                </Text>
+                <Text className="text-lg text-white font-extrabold text-right basis-1/4">
+                  {basketQuantity}
+                </Text>
+              </TouchableOpacity>
+            </View>
           )}
           <ScrollView
             className="px-3"
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 80 }}
+            contentContainerStyle={{ paddingBottom: 120 }}
           >
             {restaurant?.map((restaurantItem) => (
               <View key={restaurantItem._id}>
@@ -146,11 +170,12 @@ const Basket = () => {
                         itemDelete={handleDelete}
                         isChecked={values.isChecked[filteredItem._id] || false}
                         onCheckChange={(itemId) => {
-                          console.log(itemId);
+                          // console.log(itemId);
                           setFieldValue(
                             `isChecked.${itemId}`,
                             !values.isChecked[itemId]
                           );
+                          // console.log(values);
                         }}
                       />
                     </View>

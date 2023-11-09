@@ -1,4 +1,4 @@
-import { View, Text, Image, ScrollView } from "react-native";
+import { Text, Image, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
 import api from "../utils/api";
 import { TouchableOpacity } from "react-native-gesture-handler";

@@ -5,8 +5,6 @@ import { iconColor } from "../utils/constants";
 import CurrencyFormatter from "./CurrencyFormatter";
 import api from "../utils/api";
 import { Feather } from "@expo/vector-icons";
-import { Formik } from "formik";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const BasketRow = ({
   data,
@@ -16,6 +14,7 @@ const BasketRow = ({
   isChecked,
   onCheckChange,
 }) => {
+  // console.log(isChecked);
   const [quantity, setQuantity] = useState(data.quantity);
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
@@ -26,10 +25,10 @@ const BasketRow = ({
     setLoading(true);
     setQuantity(quantity - 1);
     const value = {
-      userId,
+      // userId,
       items: [{ food: data.food._id, quantity: -1 }],
     };
-    await api.patch("/basket", value).finally(function () {
+    await api.patch(`/basket/${userId}`, value).finally(function () {
       setLoading(false);
     });
   };
@@ -92,13 +91,14 @@ const BasketRow = ({
           className="w-20 h-20 rounded-xl"
         />
       </View>
-      <TouchableOpacity onPress={() => onCheckChange(data._id)}>
+      {/* Fix this */}
+      {/* <TouchableOpacity onPress={() => onCheckChange(data._id)}>
         <MaterialCommunityIcons
           name={isChecked ? "checkbox-intermediate" : "checkbox-blank-outline"}
           size={24}
           color={iconColor}
         />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 };
