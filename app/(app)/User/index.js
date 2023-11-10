@@ -1,7 +1,7 @@
 import { View, Text, Image, Button } from "react-native";
 import React from "react";
 import { Link, router } from "expo-router";
-import { removeAuthToken } from "../../utils/auth";
+import { removeAuthToken } from "../../../utils/auth";
 
 const User = () => {
   const LogoutHandle = () => {

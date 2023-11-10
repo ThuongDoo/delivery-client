@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Entypo } from "@expo/vector-icons";
@@ -48,8 +49,7 @@ const BasketRow = ({
   const deleteItem = async () => {
     setIsDelete(true);
     itemDelete(data.food._id);
-    const value = { userId, food: data.food._id };
-    const res = await api.patch(`/basket/${userId}/${data.food._id}`);
+    await api.patch(`/basket/${userId}/${data.food._id}`);
   };
   useEffect(() => {
     total({ _id: data.food._id, quantity });

@@ -63,7 +63,20 @@ const AppLayout = () => {
               color={focused ? "red" : "black"}
             />
           ),
-          tabBarLabel: "Basket",
+        }}
+      />
+
+      <Tabs.Screen
+        name="Order"
+        href="Order"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <Ionicons
+              name={focused ? "md-document" : "md-document-outline"}
+              size={24}
+              color={focused ? "red" : "black"}
+            />
+          ),
         }}
       />
       <Tabs.Screen
