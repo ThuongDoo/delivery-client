@@ -6,8 +6,23 @@ const OrderLayout = () => {
     <Stack
       screenOptions={{
         headerShown: true,
+        headerStyle: {
+          backgroundColor: "#f4511e",
+        },
+        headerTintColor: "#fff",
+        headerTitleStyle: {
+          fontWeight: "bold",
+        },
       }}
-    ></Stack>
+    >
+      <Stack.Screen
+        name="index"
+        options={{
+          title: "Orders",
+        }}
+      />
+      {/* <Stack.Screen name="Payment" options={{}} /> */}
+    </Stack>
   );
 };
 

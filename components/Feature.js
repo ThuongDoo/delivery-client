@@ -1,10 +1,9 @@
-import { View, Text, Image, ScrollView } from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import api from "../utils/api";
 import { router } from "expo-router";
 import { setError } from "../slices/errorSlice";
 import { useDispatch } from "react-redux";
-import { TouchableOpacity } from "react-native-gesture-handler";
 
 const Feature = () => {
   const [feature, setFeature] = useState([]);

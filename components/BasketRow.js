@@ -1,24 +1,18 @@
 /* eslint-disable react/prop-types */
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, MaterialCommunityIcons } from "@expo/vector-icons";
 import { iconColor } from "../utils/constants";
 import CurrencyFormatter from "./CurrencyFormatter";
 import api from "../utils/api";
 import { Feather } from "@expo/vector-icons";
 
-const BasketRow = ({
-  data,
-  userId,
-  total,
-  itemDelete,
-  isChecked,
-  onCheckChange,
-}) => {
+const BasketRow = ({ data, userId, itemDelete, onChange }) => {
   // console.log(isChecked);
   const [quantity, setQuantity] = useState(data.quantity);
   const [loading, setLoading] = useState(false);
   const [isDelete, setIsDelete] = useState(false);
+  const [isChecked, setIsChecked] = useState(data.isChecked);
   const removeFromBasket = async () => {
     if (loading) {
       return;
@@ -52,11 +46,14 @@ const BasketRow = ({
     await api.patch(`/basket/${userId}/${data.food._id}`);
   };
   useEffect(() => {
-    total({ _id: data.food._id, quantity });
-  }, [quantity]);
+    onChange({ _id: data.food._id, quantity, isChecked });
+  }, [quantity, isChecked]);
   useEffect(() => {
     setQuantity(data.quantity);
   }, [data.quantity]);
+  useEffect(() => {
+    setIsChecked(data.isChecked);
+  }, [data.isChecked]);
 
   // console.log(data);
 
@@ -91,14 +88,17 @@ const BasketRow = ({
           className="w-20 h-20 rounded-xl"
         />
       </View>
-      {/* Fix this */}
-      {/* <TouchableOpacity onPress={() => onCheckChange(data._id)}>
+      <TouchableOpacity
+        onPress={() => {
+          setIsChecked(!isChecked);
+        }}
+      >
         <MaterialCommunityIcons
           name={isChecked ? "checkbox-intermediate" : "checkbox-blank-outline"}
           size={24}
           color={iconColor}
         />
-      </TouchableOpacity> */}
+      </TouchableOpacity>
     </View>
   );
 };

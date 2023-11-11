@@ -1,4 +1,4 @@
-import { View, Text, Image, ScrollView } from "react-native";
+import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
@@ -9,7 +9,6 @@ import { useDispatch } from "react-redux";
 import Dish from "../../../../components/Dish";
 import { setError } from "../../../../slices/errorSlice";
 import BasketIcon from "../../../../components/BasketIcon";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { iconColor } from "../../../../utils/constants";
 
 const Restaurant = () => {
@@ -132,7 +131,7 @@ const Restaurant = () => {
               </View>
             </View>
             <Text>{restaurant.description}</Text>
-            <Text>Recommended</Text>
+            {/* <Text>Recommended</Text> */}
             <View>
               {items?.map((item) => (
                 <Dish

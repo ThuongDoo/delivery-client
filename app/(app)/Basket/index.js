@@ -1,15 +1,17 @@
 import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import BasketRow from "../../../components/BasketRow";
 import api from "../../../utils/api";
 import { getUser } from "../../../slices/userSlice";
 import CurrencyFormatter from "../../../components/CurrencyFormatter";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Formik } from "formik";
 import ModalLoader from "react-native-modal-loader";
+import { setError } from "../../../slices/errorSlice";
 const Basket = () => {
   const [basket, setBasket] = useState([]);
+  const dispatch = useDispatch();
   const [basketQuantity, setBasketQuantity] = useState(0);
   const [basketTotalPrice, setBasketTotalPrice] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +20,7 @@ const Basket = () => {
   useFocusEffect(
     React.useCallback(() => {
       const fetchData = async () => {
-        api
+        await api
           .get(`/basket/${user.userId}`)
           .then((res) => {
             const inputData = res.data.items;
@@ -28,17 +30,21 @@ const Basket = () => {
                 return restaurant.restaurant._id === item.food.restaurant._id;
               });
               if (existingRestaurant) {
-                existingRestaurant.items.push(item);
+                existingRestaurant.items.push({ ...item, isChecked: true });
               } else {
-                acc.push({ restaurant: item.food.restaurant, items: [item] });
+                acc.push({
+                  restaurant: item.food.restaurant,
+                  items: [{ ...item, isChecked: true }],
+                });
               }
 
               return acc;
             }, []);
             setBasket(uniqueBasket);
+            // console.log(uniqueBasket[0].items);
           })
           .catch((err) => {
-            throw new Error(err.message);
+            err?.response && dispatch(setError(err.response.status));
           });
       };
       fetchData();
@@ -46,12 +52,17 @@ const Basket = () => {
   );
 
   const handleChange = (value) => {
+    console.log("change");
     const updateBasket = basket.map((restaurant) => {
       return {
         ...restaurant,
         items: restaurant.items.map((item) => {
           if (item.food._id === value._id) {
-            return { ...item, quantity: value.quantity };
+            return {
+              ...item,
+              quantity: value.quantity,
+              isChecked: value.isChecked,
+            };
           }
           return item;
         }),
@@ -76,11 +87,61 @@ const Basket = () => {
     });
     setBasket(updateBasket);
   };
+  const handleSubmit = () => {
+    setIsLoading(true);
+
+    console.log(basket);
+    let updateBasket = [...basket];
+    let value = JSON.parse(JSON.stringify(basket));
+
+    value.forEach((restaurant, restaurantIndex) => {
+      restaurant.items = restaurant.items.filter(
+        (item) => item.isChecked === true
+      );
+    });
+    value = value.filter((restaurant) => restaurant.items.length !== 0);
+    console.log(value);
+
+    const postData = async () => {
+      await api
+        .post(`/order/${user.userId}`, value)
+        .then((res) => {
+          console.log(res.data);
+          updateBasket.forEach((restaurant) => {
+            restaurant.items = restaurant.items.filter(
+              (item) => item.isChecked === false
+            );
+          });
+          updateBasket = updateBasket.filter(
+            (restaurant) => restaurant.items.length !== 0
+          );
+          setBasket(updateBasket);
+        })
+        .catch((err) => {
+          throw new Error(err.message);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+      console.log("=========");
+      console.log(updateBasket);
+      await api
+        .patch(`/basket/update/${user.userId}`, updateBasket)
+        .catch((err) => {
+          throw new Error(err.message);
+        });
+      console.log(value);
+    };
+    postData();
+  };
 
   useEffect(() => {
     const quantity = basket.reduce((restaurantTotal, restaurantItem) => {
       return (restaurantTotal += restaurantItem.items.reduce((total, item) => {
-        return (total += item.quantity);
+        if (item.isChecked === true) {
+          return (total += item.quantity);
+        }
+        return total;
       }, 0));
     }, 0);
     setBasketQuantity(quantity);
@@ -88,122 +149,103 @@ const Basket = () => {
   useEffect(() => {
     const totalPrice = basket.reduce((restaurantTotal, restaurantItem) => {
       return (restaurantTotal += restaurantItem.items.reduce((total, item) => {
-        return (total += item.quantity * item.food.price);
+        if (item.isChecked === true) {
+          return (total += item.quantity * item.food.price);
+        }
+        return total;
       }, 0));
     }, 0);
     setBasketTotalPrice(totalPrice);
   }, [basket]);
-
   return (
-    <Formik
-      initialValues={{ isChecked: {} }}
-      onSubmit={(values) => {
-        const checkedFoods = Object.keys(values.isChecked).filter(
-          (key) => values.isChecked[key] === true
-        );
-        console.log(checkedFoods);
-        // router.push("Basket/Payment");
-        setIsLoading(true);
-        const postData = async () => {
-          api
-            .post(`/order/${user.userId}`, basket)
-            .then((res) => {
-              console.log(res.data);
-              setBasket([]);
-            })
-            .catch((err) => {
-              throw new Error(err.message);
-            })
-            .finally(() => {
-              setIsLoading(false);
-            });
-          console.log("=========");
-          api.delete(`/basket/${user.userId}`).catch((err) => {
-            throw new Error(err.message);
-          });
-        };
-        postData();
-        console.log(basket);
-      }}
-    >
-      {({ values, setFieldValue, handleSubmit }) => (
-        <View className="h-full">
-          <ModalLoader loading={isLoading} />
+    <View className="h-full">
+      <ModalLoader loading={isLoading} />
 
-          {basketQuantity !== 0 && (
-            <View className="mx-3 bg-white absolute bottom-2 left-0 right-0 z-50 h-32 rounded-md">
-              <View className="mx-2">
-                <View className="flex-row justify-between">
-                  <Text>Subtotal</Text>
-                  <Text>{CurrencyFormatter({ amount: basketTotalPrice })}</Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text>Shipping fee</Text>
-                  <Text>{CurrencyFormatter({ amount: shippingFee })}</Text>
-                </View>
-                <View className="flex-row justify-between">
-                  <Text>Total</Text>
-                  <Text>
-                    {CurrencyFormatter({
-                      amount: basketTotalPrice + shippingFee,
-                    })}
-                  </Text>
-                </View>
-              </View>
-              <TouchableOpacity
-                className="px-3 bg-customRed flex-row rounded-lg space-x-1 items-center py-4 mx-2"
-                onPress={handleSubmit}
-              >
-                <Text className="text-lg font-extrabold text-white basis-1/4">
-                  Order
-                </Text>
-                <Text className="text-lg text-white font-extrabold text-center flex-1">
-                  {CurrencyFormatter({ amount: basketTotalPrice })}
-                </Text>
-                <Text className="text-lg text-white font-extrabold text-right basis-1/4">
-                  {basketQuantity}
-                </Text>
-              </TouchableOpacity>
+      {basketQuantity !== 0 && (
+        <View className="mx-3 bg-white absolute bottom-2 left-0 right-0 z-50 rounded-md flex justify-between py-2 px-2 space-y-2">
+          <View className="">
+            <View className="flex-row justify-between">
+              <Text>Subtotal</Text>
+              <Text>{CurrencyFormatter({ amount: basketTotalPrice })}</Text>
             </View>
-          )}
-          <ScrollView
-            className="px-3"
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 120 }}
+            <View className="flex-row justify-between">
+              <Text>Shipping fee</Text>
+              <Text>{CurrencyFormatter({ amount: shippingFee })}</Text>
+            </View>
+            {/* <View className="flex-row justify-between">
+              <Text>Total</Text>
+              <Text>
+                {CurrencyFormatter({
+                  amount: basketTotalPrice + shippingFee,
+                })}
+              </Text>
+            </View> */}
+          </View>
+          <TouchableOpacity
+            className="px-3 bg-customRed flex-row rounded-lg space-x-1 items-center py-4"
+            onPress={handleSubmit}
           >
-            {basket?.map((restaurant) => (
-              <View key={restaurant.restaurant._id}>
-                <View className="flex-row items-center space-x-2 py-2 border-b">
-                  <Image
-                    source={{ uri: restaurant.restaurant.image }}
-                    className="w-7 h-7"
-                  />
-                  <Text>{restaurant.restaurant.name}</Text>
-                </View>
-
-                {restaurant.items.map((item) => (
-                  <View key={item._id}>
-                    <BasketRow
-                      data={item}
-                      userId={user.userId}
-                      total={handleChange}
-                      itemDelete={handleDelete}
-                      isChecked={values.isChecked[item._id] || false}
-                      onCheckChange={(itemId) => {
-                        setFieldValue(
-                          `isChecked.${itemId}`,
-                          !values.isChecked[itemId]
-                        );
-                      }}
-                    />
-                  </View>
-                ))}
-              </View>
-            ))}
-          </ScrollView>
+            <Text className="text-lg font-extrabold text-white basis-1/4">
+              Order
+            </Text>
+            <Text className="text-lg text-white font-extrabold text-center flex-1">
+              {CurrencyFormatter({ amount: basketTotalPrice + shippingFee })}
+            </Text>
+            <Text className="text-lg text-white font-extrabold text-right basis-1/4">
+              {basketQuantity}
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
-    </Formik>
+      {basket?.length === 0 && (
+        <View className="h-full flex items-center justify-center">
+          <Text>There is no item in your basket</Text>
+        </View>
+      )}
+      <ScrollView
+        className="px-3"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 120 }}
+      >
+        {basket?.map((restaurant) => (
+          <View key={restaurant.restaurant._id}>
+            <View className="flex-row items-center justify-between py-2 border-b">
+              <View className="flex-row items-center space-x-2">
+                <Image
+                  source={{ uri: restaurant.restaurant.image }}
+                  className="w-7 h-7"
+                />
+                <Text>{restaurant.restaurant.name}</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  router.push({
+                    pathname: "/Home/Restaurant/[restaurant]",
+                    params: {
+                      restaurant: restaurant.restaurant._id,
+                    },
+                  });
+                }}
+              >
+                <Text className="text-red-500 text-lg">Change</Text>
+              </TouchableOpacity>
+            </View>
+
+            {restaurant.items.map((item) => (
+              <View key={item._id}>
+                <BasketRow
+                  data={item}
+                  userId={user.userId}
+                  onChange={handleChange}
+                  itemDelete={handleDelete}
+                  isChecked={false}
+                />
+              </View>
+            ))}
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 };
 

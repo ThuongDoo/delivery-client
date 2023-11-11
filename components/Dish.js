@@ -1,7 +1,6 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { Entypo } from "@expo/vector-icons";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import CurrencyFormatter from "./CurrencyFormatter";
 import { iconColor } from "../utils/constants";
 
