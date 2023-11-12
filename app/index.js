@@ -1,4 +1,4 @@
-import { View, Text, Image, Button, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import { Formik } from "formik";
 import { TextInput } from "react-native-gesture-handler";

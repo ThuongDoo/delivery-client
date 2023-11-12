@@ -2,7 +2,7 @@ import { View, Text, Image, Button } from "react-native";
 import React from "react";
 import { Link, router } from "expo-router";
 import { removeAuthToken } from "../../../utils/auth";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { getUser } from "../../../slices/userSlice";
 
 const User = () => {
@@ -10,7 +10,6 @@ const User = () => {
     removeAuthToken();
     router.replace("/");
   };
-  const dispatch = useDispatch();
   const user = useSelector(getUser);
   console.log(user);
   return (

@@ -1,4 +1,5 @@
-import { View, Text } from "react-native";
+/* eslint-disable react/prop-types */
+import { Text } from "react-native";
 import React from "react";
 import { Modal } from "react-native";
 

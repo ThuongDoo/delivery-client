@@ -6,7 +6,6 @@ import api from "../../../utils/api";
 import { getUser } from "../../../slices/userSlice";
 import CurrencyFormatter from "../../../components/CurrencyFormatter";
 import { router, useFocusEffect } from "expo-router";
-import { Formik } from "formik";
 import ModalLoader from "react-native-modal-loader";
 import { setError } from "../../../slices/errorSlice";
 const Basket = () => {
@@ -94,7 +93,7 @@ const Basket = () => {
     let updateBasket = [...basket];
     let value = JSON.parse(JSON.stringify(basket));
 
-    value.forEach((restaurant, restaurantIndex) => {
+    value.forEach((restaurant) => {
       restaurant.items = restaurant.items.filter(
         (item) => item.isChecked === true
       );

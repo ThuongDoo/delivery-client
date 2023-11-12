@@ -3,14 +3,12 @@ import {
   Text,
   ScrollView,
   Image,
-  Button,
   TouchableOpacity,
   Modal,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getUser } from "../../../slices/userSlice";
-import { router, useFocusEffect } from "expo-router";
 import api from "../../../utils/api";
 import ModalLoader from "react-native-modal-loader";
 import CurrencyFormatter from "../../../components/CurrencyFormatter";
