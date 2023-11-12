@@ -15,6 +15,7 @@ const CategoryRow = () => {
     };
     fetchData();
   }, []);
+
   return (
     <ScrollView
       horizontal
