@@ -17,6 +17,31 @@ import CurrencyFormatter from "../../../components/CurrencyFormatter";
 import { Ionicons } from "@expo/vector-icons";
 import { setError } from "../../../slices/errorSlice";
 
+const statusColor = (status) => {
+  let color;
+  switch (status) {
+    case "Pending":
+      color = "blue";
+      break;
+
+    case "Confirmed":
+      color = "blue";
+      break;
+
+    case "Cancelled":
+      color = "red";
+      break;
+
+    case "Shipped":
+      color = "green";
+      break;
+
+    default:
+      break;
+  }
+  return color;
+};
+
 const formatDate = (createdAtString) => {
   const createdAtDate = new Date(createdAtString);
 
@@ -32,27 +57,26 @@ const Order = () => {
   const [order, setOrder] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isChosen, setIsChosen] = useState("");
+  const [reload, setReload] = useState(false);
   const dispatch = useDispatch();
   const user = useSelector(getUser);
-  useFocusEffect(
-    React.useCallback(() => {
-      const fetchData = async () => {
-        await api
-          .get(`/order/${user.userId}`)
-          .then((res) => {
-            setOrder(res.data);
-          })
-          .catch((err) => {
-            err?.response && dispatch(setError(err.response.status));
-          })
-          .finally(() => {
-            setIsLoading(false);
-          });
-      };
-      fetchData();
-    }, [user.userId])
-  );
-  console.log("hii");
+  useEffect(() => {
+    const fetchData = async () => {
+      await api
+        .get(`/order/${user.userId}`)
+        .then((res) => {
+          setOrder(res.data);
+        })
+        .catch((err) => {
+          err?.response && dispatch(setError(err.response.status));
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    };
+    fetchData();
+  }, [user.userId, reload]);
+
   return (
     <View>
       <ModalLoader loading={isLoading} />
@@ -65,6 +89,9 @@ const Order = () => {
         isVisible={isVisible}
         onClose={(value) => setIsVisible(value)}
         orderId={isChosen}
+        onChange={() => {
+          setReload(!reload);
+        }}
       />
       <ScrollView
         className="px-3"
@@ -103,7 +130,9 @@ const Order = () => {
                 <Text>
                   Total: {CurrencyFormatter({ amount: orderItem.total })}
                 </Text>
-                <Text>Status: {orderItem.status}</Text>
+                <Text style={{ color: statusColor(orderItem.status) }}>
+                  Status: {orderItem.status}
+                </Text>
               </View>
               <Image
                 source={{ uri: orderItem.restaurant.image }}
@@ -117,25 +146,31 @@ const Order = () => {
   );
 };
 
-const OrderModal = ({ isVisible, onClose, orderId }) => {
-  const [isLoading, setIsLoading] = useState(true);
+const OrderModal = ({ isVisible, onClose, orderId, onChange }) => {
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(true);
   const [order, setOrder] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       await api
         .get(`/order/singleOrder/${orderId}`)
-        .then((res) => setOrder(res.data))
+        .then((res) => {
+          console.log(res.data);
+          setOrder(res.data);
+        })
         .catch((err) => {
           err?.response && dispatch(setError(err.response.status));
         })
         .finally(() => {
-          // setIsLoading(false);
+          setIsLoading(false);
+          console.log("completed");
         });
     };
-    fetchData();
+    if (isVisible) {
+      fetchData();
+    }
   }, [orderId]);
-  console.log(order);
+  // console.log(order);
   return (
     <Modal
       animationType="slide"
@@ -147,22 +182,79 @@ const OrderModal = ({ isVisible, onClose, orderId }) => {
         className="h-full "
         onPress={() => onClose(false)}
       ></TouchableOpacity>
-      <View className=" absolute top-16 h-5/6 left-0 right-0 mx-5 bg-white rounded-xl shadow-xl shadow-black">
-        <TouchableOpacity
-          onPress={() => onClose(false)}
-          className="absolute right-0 z-50"
-        >
-          <Ionicons name="close" size={30} color="black" />
-        </TouchableOpacity>
-        <ScrollView>
-          <Text>{orderId}</Text>
-          {order?.items?.map((item) => (
-            <View key={item._id}>
-              <Text>{item.food}</Text>
+      {!isLoading && (
+        <View className=" absolute top-16 h-5/6 left-0 right-0 mx-5 bg-white rounded-xl shadow-xl shadow-black">
+          <TouchableOpacity
+            onPress={() => onClose(false)}
+            className="absolute right-0 z-50 "
+          >
+            <View className="bg-white w-3 h-3 absolute top-2 left-2"></View>
+            <Ionicons
+              name="close-circle"
+              size={30}
+              color="red" // Màu của biểu tượng
+            />
+          </TouchableOpacity>
+          <Image
+            source={{ uri: order?.restaurant?.image }}
+            className="w-full h-20 rounded-t-xl"
+          />
+          <View className="flex-row justify-between px-3 py-1">
+            <View className="">
+              <Text className=" text-xs text-gray-500">ID: {orderId}</Text>
+              <Text className=" text-xs text-gray-500">
+                created at: {formatDate(order.createdAt)}
+              </Text>
             </View>
-          ))}
-        </ScrollView>
-      </View>
+            <Text className="text-xl font-extrabold ">
+              {order.restaurant?.name}
+            </Text>
+          </View>
+          <ScrollView className="px-3">
+            {order?.items?.map((item) => (
+              <View
+                key={item._id}
+                className="flex-row items-center justify-between gap-2S border-b border-t border-gray-200 h-32 py-3"
+              >
+                <View className=" flex-1">
+                  <Text className="text-lg font-bold">{item.food?.name}</Text>
+                  <Text className="font-bold text-red-500 text-lg">
+                    {CurrencyFormatter({ amount: item?.food?.price })}
+                  </Text>
+                  <View className="flex-row justify-between w-20 items-center">
+                    <Text>{item.quantity}</Text>
+                  </View>
+                </View>
+                <View className="">
+                  <Image
+                    source={{ uri: item.food?.image }}
+                    className="w-20 h-20 rounded-xl"
+                  />
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+          <View className="flex-row justify-between p-3 gap-3">
+            <View className="rounded-xl flex-1 items-center">
+              <Text>TOTAL: {CurrencyFormatter({ amount: order?.total })}</Text>
+              <Text>STATUS: {order.status}</Text>
+            </View>
+            <TouchableOpacity
+              onPress={async () => {
+                const value = { status: "Cancelled" };
+                await api.patch(`/order/${orderId}`, value).then((res) => {
+                  console.log(res.data);
+                });
+                onChange(true);
+                onClose(false);
+              }}
+              className="bg-red-500 rounded-xl flex-1 items-center justify-center"
+            >
+              <Text className="text-white font-bold">CANCEL</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
     </Modal>
   );
 };

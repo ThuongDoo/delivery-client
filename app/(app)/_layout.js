@@ -28,8 +28,12 @@ const AppLayout = () => {
     removeAuthToken();
     dispatch(setError(null));
     return router.replace("/");
+  } else if (error.error === 404) {
+    console.log("error");
+    // removeAuthToken();
+    // router.replace("/");
   } else if (error.error) {
-    console.log("ERROR");
+    console.log(error.error);
   }
   return (
     <Tabs

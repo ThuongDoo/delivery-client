@@ -1,29 +1,34 @@
-import { View, Text, Image, Button, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, TextInput, Image } from "react-native";
 import React from "react";
-import { Formik } from "formik";
-import { TextInput } from "react-native-gesture-handler";
-import api from "../utils/api";
 import * as Yup from "yup";
-import * as AuthRequire from "../utils/auth";
 import { router } from "expo-router";
+import { Formik } from "formik";
+import api from "../utils/api";
 
-const index = () => {
-  AuthRequire.checkAuthToken();
+const signUp = () => {
   const validationSchema = Yup.object().shape({
     email: Yup.string()
       .required("Email is required")
       .email("Invalide email anddress"),
     password: Yup.string().required("Password is required"),
+    validatePassword: Yup.string()
+      .required("Password is required")
+      .oneOf([Yup.ref("password"), null], "Passwords must match"),
+    name: Yup.string().required("Name is required"),
   });
   return (
     <Formik
-      initialValues={{ email: "", password: "123456" }}
+      initialValues={{
+        email: "",
+        name: "",
+        password: "",
+        validatePassword: "",
+        role: "user",
+      }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
-        await api.post("/auth/login", values);
-        const user = await api.get("/user/showMe");
-        AuthRequire.saveAuthToken(JSON.stringify(user.data.user));
-        router.replace("/Home");
+        await api.post("/auth/register", values);
+        router.replace("/");
       }}
     >
       {({
@@ -60,6 +65,19 @@ const index = () => {
             )}
           </View>
           <View>
+            <Text>Name</Text>
+            <TextInput
+              placeholder="Name"
+              onChangeText={handleChange("name")}
+              onBlur={handleBlur("name")}
+              value={values.name}
+              className="border rounded-lg px-3 border-black w-44"
+            />
+            {touched.name && errors.name && (
+              <Text className="text-red-500">{errors.name}</Text>
+            )}
+          </View>
+          <View>
             <Text>Password</Text>
             <TextInput
               placeholder="Password"
@@ -73,19 +91,33 @@ const index = () => {
               <Text className="text-red-500">{errors.password}</Text>
             )}
           </View>
+          <View>
+            <Text>Re-enter password</Text>
+            <TextInput
+              placeholder="validatePassword"
+              onChangeText={handleChange("validatePassword")}
+              onBlur={handleBlur("validatePassword")}
+              value={values.validatePassword}
+              secureTextEntry
+              className="border rounded-lg px-3 border-black w-44"
+            />
+            {touched.validatePassword && errors.validatePassword && (
+              <Text className="text-red-500">{errors.validatePassword}</Text>
+            )}
+          </View>
           <TouchableOpacity
             onPress={handleSubmit}
             className=" bg-red-500 rounded-lg h-7 items-center justify-center"
           >
-            <Text className="text-white text-md">LOGIN</Text>
+            <Text className="text-white text-md">SIGN UP</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              router.replace("signUp");
+              router.replace("/");
             }}
             className=" bg-red-500 rounded-lg h-7 items-center justify-center"
           >
-            <Text className="text-white text-md">SIGN UP</Text>
+            <Text className="text-white text-md">LOGIN</Text>
           </TouchableOpacity>
           {/* <Button title="Login" onPress={handleSubmit} /> */}
         </View>
@@ -94,4 +126,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default signUp;

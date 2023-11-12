@@ -1,16 +1,14 @@
 import React from "react";
 import { Stack } from "expo-router";
 
-const UserLayout = () => {
+const CategoryLayout = () => {
   return (
     <Stack
       screenOptions={{
         headerShown: true,
       }}
-    >
-      <Stack.Screen options={{ title: "User" }} name="index" />
-    </Stack>
+    ></Stack>
   );
 };
 
-export default UserLayout;
+export default CategoryLayout;

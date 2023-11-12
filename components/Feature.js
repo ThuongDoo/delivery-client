@@ -30,10 +30,21 @@ const Feature = () => {
             showsHorizontalScrollIndicator={false}
             className="space-x-5 mt-3"
           >
-            <Image
-              source={{ uri: item.image }}
-              className="h-56 w-80 rounded-3xl"
-            />
+            <TouchableOpacity
+              onPress={() => {
+                router.push({
+                  pathname: "/Home/Feature/[feature]",
+                  params: {
+                    feature: item._id,
+                  },
+                });
+              }}
+            >
+              <Image
+                source={{ uri: item.image }}
+                className="h-56 w-80 rounded-3xl"
+              />
+            </TouchableOpacity>
             {item.restaurant?.map((restaurant) => (
               <TouchableOpacity
                 key={restaurant._id}

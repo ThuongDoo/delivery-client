@@ -7,46 +7,33 @@ import { setError } from "../../../../slices/errorSlice";
 import ModalLoader from "react-native-modal-loader";
 import RestaurantCard from "../../../../components/RestaurantCard";
 
-const Category = () => {
+const Feature = () => {
   const local = useLocalSearchParams();
-  const [category, setCategory] = useState([]);
+  const [feature, setfeature] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [restaurant, setRestaurant] = useState([]);
   const dispatch = useDispatch();
   useEffect(() => {
     const fetchData = async () => {
       await api
-        .get(`/category/${local.category}`)
-        .then((res) => setCategory(res.data.category))
+        .get(`/feature/${local.feature}`)
+        .then((res) => {
+          setfeature(res.data.feature);
+          setRestaurant(res.data.feature.restaurant);
+        })
         .catch((err) => {
           err?.response && dispatch(setError(err.response.status));
-        });
-    };
-    fetchData();
-  }, []);
-  // console.log(category);
-  console.log(local.category);
-  useEffect(() => {
-    const fetchData = async () => {
-      await api
-        .get(`/restaurant?category=${local.category}`)
-        .then((res) => {
-          setRestaurant(res.data.restaurant);
         })
-        .catch((err) => console.log(err.message))
-        .finally(() => {
-          setIsLoading(false);
-        });
+        .finally(() => setIsLoading(false));
     };
     fetchData();
   }, []);
   console.log(restaurant);
-
   return (
     <View>
       <Stack.Screen
         options={{
-          title: category.name,
+          title: feature.name,
           headerShown: true,
           headerStyle: {
             backgroundColor: "#f4511e",
@@ -79,4 +66,4 @@ const Category = () => {
   );
 };
 
-export default Category;
+export default Feature;
