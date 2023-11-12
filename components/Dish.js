@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { Entypo } from "@expo/vector-icons";

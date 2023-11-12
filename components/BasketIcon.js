@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { View, Text, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
