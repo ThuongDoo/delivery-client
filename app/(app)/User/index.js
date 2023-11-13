@@ -1,28 +1,43 @@
-import { View, Text, Image, Button } from "react-native";
-import React from "react";
+import { View, Text, Image, Button, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
 import { Link, router } from "expo-router";
 import { removeAuthToken } from "../../../utils/auth";
-import { useSelector } from "react-redux";
-import { getUser } from "../../../slices/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { getUser, setUser } from "../../../slices/userSlice";
+import api from "../../../utils/api";
+import { setError } from "../../../slices/errorSlice";
 
 const User = () => {
   const LogoutHandle = () => {
     removeAuthToken();
     router.replace("/");
   };
+  const [userData, setUserData] = useState([]);
   const user = useSelector(getUser);
-  console.log(user);
+  useEffect(() => {
+    const fetchData = async () => {
+      api.get(`/user/${user.userId}`).then((res) => setUserData(res.data.user));
+    };
+    fetchData();
+  }, [user.userId]);
+
+  const changeImage = async () => {};
   return (
     <View>
       <Text>Hello {user.name}</Text>
-      <Link href="/Home" asChild>
+      <TouchableOpacity
+        onPress={() => {
+          changeImage();
+        }}
+        className="bg-blue-500 self-center rounded-full border"
+      >
         <Image
           source={{
-            uri: "https://img-l3.xvideos-cdn.com/videos/thumbs169poster/e8/aa/53/e8aa53fe236b94e2c9bdff2bbd416311/e8aa53fe236b94e2c9bdff2bbd416311.5.jpg",
+            uri: userData.image,
           }}
-          className="w-full h-32"
+          className="w-32 h-32 rounded-full"
         />
-      </Link>
+      </TouchableOpacity>
       <Button onPress={LogoutHandle} title="Log out" />
     </View>
   );
