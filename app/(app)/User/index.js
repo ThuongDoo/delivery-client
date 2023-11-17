@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getUser, setUser } from "../../../slices/userSlice";
 import api from "../../../utils/api";
 import { setError } from "../../../slices/errorSlice";
+import { Feather } from "@expo/vector-icons";
 
 const User = () => {
   const LogoutHandle = () => {
@@ -24,12 +25,11 @@ const User = () => {
   const changeImage = async () => {};
   return (
     <View>
-      <Text>Hello {user.name}</Text>
       <TouchableOpacity
         onPress={() => {
           changeImage();
         }}
-        className="bg-blue-500 self-center rounded-full border"
+        className="bg-blue-500 self-center rounded-full border mt-5"
       >
         <Image
           source={{
@@ -38,7 +38,14 @@ const User = () => {
           className="w-32 h-32 rounded-full"
         />
       </TouchableOpacity>
-      <Button onPress={LogoutHandle} title="Log out" />
+      <Text className="text-center text-xl font-bold py-2">{user.name}</Text>
+      <TouchableOpacity
+        onPress={LogoutHandle}
+        className="px-2 flex-row items-center space-x-2 py-2 bg-white"
+      >
+        <Feather name="log-out" size={24} color="black" />
+        <Text>Log out</Text>
+      </TouchableOpacity>
     </View>
   );
 };
