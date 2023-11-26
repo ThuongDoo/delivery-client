@@ -15,6 +15,9 @@ import ModalLoader from "react-native-modal-loader";
 import CurrencyFormatter from "../../../components/CurrencyFormatter";
 import { Ionicons } from "@expo/vector-icons";
 import { setError } from "../../../slices/errorSlice";
+import FormatDate from "../../../components/FormatDate";
+import { router, useFocusEffect } from "expo-router";
+import { iconColor } from "../../../utils/constants";
 
 const statusColor = (status) => {
   let color;
@@ -23,7 +26,7 @@ const statusColor = (status) => {
       color = "blue";
       break;
 
-    case "Confirmed":
+    case "Completed":
       color = "blue";
       break;
 
@@ -41,44 +44,102 @@ const statusColor = (status) => {
   return color;
 };
 
-const formatDate = (createdAtString) => {
-  const createdAtDate = new Date(createdAtString);
-
-  const year = createdAtDate.getFullYear();
-  const month = String(createdAtDate.getMonth() + 1).padStart(2, "0");
-  const day = String(createdAtDate.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
-
 const Order = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [order, setOrder] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isChosen, setIsChosen] = useState("");
   const [reload, setReload] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState(null);
   const dispatch = useDispatch();
   const user = useSelector(getUser);
-  useEffect(() => {
-    const fetchData = async () => {
-      await api
-        .get(`/order/${user.userId}`)
-        .then((res) => {
-          setOrder(res.data);
-        })
-        .catch((err) => {
-          err?.response && dispatch(setError(err.response.status));
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    };
-    fetchData();
-  }, [user.userId, reload]);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        let apiUrl = `/order/${user.userId}`;
 
+        if (selectedFilter !== null) {
+          apiUrl += `?status=${selectedFilter}`;
+        }
+        await api
+          .get(apiUrl)
+          .then((res) => {
+            setOrder(res.data);
+          })
+          .catch((err) => {
+            err?.response && dispatch(setError(err.response.status));
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      };
+      fetchData();
+    }, [user.userId, reload, selectedFilter])
+  );
+  const handleButtonPress = (value) => {
+    setSelectedFilter(value);
+  };
   return (
     <View>
       <ModalLoader loading={isLoading} />
+      <View className="flex-row justify-between border border-white">
+        <TouchableOpacity
+          className="flex-1 p-2 items-center"
+          style={{
+            backgroundColor: selectedFilter === null ? iconColor : "white",
+          }}
+          onPress={() => handleButtonPress(null)}
+        >
+          <Text style={{ color: selectedFilter === null ? "white" : "black" }}>
+            All
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-1 p-2 items-center"
+          style={{
+            backgroundColor: selectedFilter === "Pending" ? iconColor : "white",
+          }}
+          onPress={() => handleButtonPress("Pending")}
+        >
+          <Text
+            style={{ color: selectedFilter === "Pending" ? "white" : "black" }}
+          >
+            Pending
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-1 p-2 items-center"
+          style={{
+            backgroundColor:
+              selectedFilter === "Completed" ? iconColor : "white",
+          }}
+          onPress={() => handleButtonPress("Completed")}
+        >
+          <Text
+            style={{
+              color: selectedFilter === "Completed" ? "white" : "black",
+            }}
+          >
+            Completed
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="flex-1 p-2 items-center"
+          style={{
+            backgroundColor:
+              selectedFilter === "Cancelled" ? iconColor : "white",
+          }}
+          onPress={() => handleButtonPress("Cancelled")}
+        >
+          <Text
+            style={{
+              color: selectedFilter === "Cancelled" ? "white" : "black",
+            }}
+          >
+            Cancelled
+          </Text>
+        </TouchableOpacity>
+      </View>
       {order?.length === 0 && (
         <View className="h-full flex items-center justify-center">
           <Text>You don&apos;t have any orders</Text>
@@ -108,7 +169,7 @@ const Order = () => {
                   ID: {orderItem._id}
                 </Text>
                 <Text className="text-gray-500 text-xs">
-                  created at:{formatDate(orderItem.createdAt)}
+                  created at: {FormatDate(orderItem.createdAt)}
                 </Text>
               </View>
               <TouchableOpacity
@@ -169,7 +230,6 @@ const OrderModal = ({ isVisible, onClose, orderId, onChange }) => {
       fetchData();
     }
   }, [orderId]);
-  // console.log(order);
   return (
     <Modal
       animationType="slide"
@@ -202,7 +262,7 @@ const OrderModal = ({ isVisible, onClose, orderId, onChange }) => {
             <View className="">
               <Text className=" text-xs text-gray-500">ID: {orderId}</Text>
               <Text className=" text-xs text-gray-500">
-                created at: {formatDate(order.createdAt)}
+                created at: {FormatDate(order.createdAt)}
               </Text>
             </View>
             <Text className="text-xl font-extrabold ">
@@ -233,24 +293,42 @@ const OrderModal = ({ isVisible, onClose, orderId, onChange }) => {
               </View>
             ))}
           </ScrollView>
-          <View className="flex-row justify-between p-3 gap-3">
-            <View className="rounded-xl flex-1 items-center">
-              <Text>TOTAL: {CurrencyFormatter({ amount: order?.total })}</Text>
-              <Text>STATUS: {order.status}</Text>
+          <View className="flex justify-between p-3 gap-3 ">
+            <View className="rounded-xl flex-row items-center justify-between space-x-2">
+              <Text className="items-start flex-1">
+                TOTAL: {CurrencyFormatter({ amount: order?.total })}
+              </Text>
+              <Text className="items-start flex-1">STATUS: {order.status}</Text>
             </View>
-            <TouchableOpacity
-              onPress={async () => {
-                const value = { status: "Cancelled" };
-                await api.patch(`/order/${orderId}`, value).then((res) => {
-                  console.log(res.data);
-                });
-                onChange(true);
-                onClose(false);
-              }}
-              className="bg-red-500 rounded-xl flex-1 items-center justify-center"
-            >
-              <Text className="text-white font-bold">CANCEL</Text>
-            </TouchableOpacity>
+            <View className="flex-row justify-between h-10 space-x-2">
+              <TouchableOpacity
+                onPress={() => {
+                  onClose(false);
+                  router.push({
+                    pathname: "/Order/Review/[restaurant]",
+                    params: {
+                      restaurant: order?.restaurant._id,
+                    },
+                  });
+                }}
+                className="border rounded-xl flex-1 items-center justify-center"
+              >
+                <Text className="font-bold">REVIEW</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => {
+                  const value = { status: "Cancelled" };
+                  await api.patch(`/order/${orderId}`, value).then((res) => {
+                    console.log(res.data);
+                  });
+                  onChange(true);
+                  onClose(false);
+                }}
+                className="bg-red-500 rounded-xl flex-1 items-center justify-center"
+              >
+                <Text className="text-white font-bold">CANCEL</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       )}

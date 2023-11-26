@@ -1,5 +1,5 @@
 import { View, Text, Image, TouchableOpacity } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { Formik } from "formik";
 import { TextInput } from "react-native-gesture-handler";
 import api from "../utils/api";
@@ -9,10 +9,11 @@ import { router } from "expo-router";
 
 const index = () => {
   AuthRequire.checkAuthToken();
+  const [error, setError] = useState(null);
   const validationSchema = Yup.object().shape({
     email: Yup.string()
       .required("Email is required")
-      .email("Invalide email anddress"),
+      .email("Invalid email anddress"),
     password: Yup.string().required("Password is required"),
   });
   return (
@@ -20,7 +21,12 @@ const index = () => {
       initialValues={{ email: "", password: "123456" }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
-        await api.post("/auth/login", values);
+        await api.post("/auth/login", values).catch((err) => {
+          if (err?.response?.status === 401) {
+            setError("Invalid Credential");
+          }
+          console.log(err);
+        });
         const user = await api.get("/user/showMe");
         AuthRequire.saveAuthToken(JSON.stringify(user.data.user));
         router.replace("/Home");
@@ -73,6 +79,7 @@ const index = () => {
               <Text className="text-red-500">{errors.password}</Text>
             )}
           </View>
+          {error && <Text className="text-red-500">{error}</Text>}
           <TouchableOpacity
             onPress={handleSubmit}
             className=" bg-red-500 rounded-lg h-7 items-center justify-center"

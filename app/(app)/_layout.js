@@ -58,8 +58,8 @@ const AppLayout = () => {
       />
       <Tabs.Screen
         name="Basket"
-        href="Basket"
         options={{
+          href: "Basket",
           tabBarIcon: ({ focused }) => (
             <Ionicons
               name={focused ? "basket" : "basket-outline"}
@@ -72,8 +72,9 @@ const AppLayout = () => {
 
       <Tabs.Screen
         name="Order"
-        href="Order"
+        // href="Order"
         options={{
+          href: "/Order",
           tabBarIcon: ({ focused }) => (
             <Ionicons
               name={focused ? "md-document" : "md-document-outline"}

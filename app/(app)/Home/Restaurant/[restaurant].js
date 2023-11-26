@@ -1,15 +1,19 @@
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { AntDesign } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import api from "../../../../utils/api";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Dish from "../../../../components/Dish";
 import { setError } from "../../../../slices/errorSlice";
 import BasketIcon from "../../../../components/BasketIcon";
 import { iconColor } from "../../../../utils/constants";
+import { getUser } from "../../../../slices/userSlice";
+import FormatDate from "../../../../components/FormatDate";
+import StarRating from "react-native-star-rating";
+import Review from "../../../../components/Review";
 
 const Restaurant = () => {
   // const [popUpVisible, setPopUpVisible] = useState(false);
@@ -18,6 +22,7 @@ const Restaurant = () => {
   const [restaurant, setRestaurant] = useState("");
   const [items, setItems] = useState([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const reviewsScrollViewRef = useRef(null);
   useFocusEffect(
     React.useCallback(() => {
       const fetchData = async () => {
@@ -37,11 +42,10 @@ const Restaurant = () => {
             setIsDataLoaded(true);
           })
           .catch((err) => {
-            {
-              err?.response && dispatch(setError(err.response.status));
-            }
+            err?.response && dispatch(setError(err.response.status));
           });
       };
+
       fetchData();
     }, [local.restaurant])
   );
@@ -68,6 +72,19 @@ const Restaurant = () => {
     // }, 1000);
   };
 
+  const handleScrollToReviews = () => {
+    // Xác định vị trí của phần tử cuối cùng trong danh sách reviews container
+    if (reviewsScrollViewRef.current) {
+      reviewsScrollViewRef.current.measureLayout(
+        reviewsScrollViewRef.current.getInnerViewNode(),
+        (x, y, width, height) => {
+          // Cuộn đến vị trí của phần tử cuối cùng
+          reviewsScrollViewRef.current.scrollTo({ y, animated: true });
+        }
+      );
+    }
+  };
+
   return (
     <View className="h-full">
       <View className="z-50 top-9 h-20 ">
@@ -89,6 +106,7 @@ const Restaurant = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 80 }}
         className=""
+        ref={reviewsScrollViewRef}
       >
         <View className=" mx-5 ">
           <View className="bg-white rounded-2xl px-3 py-4 flex gap-y-2 mt-0">
@@ -97,15 +115,18 @@ const Restaurant = () => {
             </View>
             <Text>{restaurant.address}</Text>
             <View className="flex-row justify-evenly py-3 bg-slate-100">
-              <View className="items-center w-24 ">
+              <TouchableOpacity
+                className="items-center w-24"
+                onPress={handleScrollToReviews}
+              >
                 <View className="flex-row items-center gap-1">
                   <AntDesign name="star" size={20} color={iconColor} />
                   <Text className="font-bold text-lg">
-                    {restaurant.avarageRating}
+                    {restaurant.averageRating}
                   </Text>
                 </View>
                 <Text>Ratings</Text>
-              </View>
+              </TouchableOpacity>
               <View className="border-r border-gray-400" />
               <View className="items-center w-24 ">
                 <View className="flex-row items-center gap-1">
@@ -147,6 +168,7 @@ const Restaurant = () => {
               ))}
             </View>
           </View>
+          <Review />
         </View>
       </ScrollView>
     </View>

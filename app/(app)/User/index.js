@@ -17,12 +17,19 @@ const User = () => {
   const user = useSelector(getUser);
   useEffect(() => {
     const fetchData = async () => {
-      api.get(`/user/${user.userId}`).then((res) => setUserData(res.data.user));
+      await api
+        .get(`/user/${user.userId}`)
+        .then((res) => setUserData(res.data.user));
     };
     fetchData();
   }, [user.userId]);
 
-  const changeImage = async () => {};
+  const changeImage = async () => {
+    await api.patch(`/user/${user.userId}`, {
+      image:
+        "https://cdn.popsww.com/blog/sites/2/2022/02/naruto-co-bao-nhieu-tap.jpg",
+    });
+  };
   return (
     <View>
       <TouchableOpacity

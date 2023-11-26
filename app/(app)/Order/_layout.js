@@ -21,7 +21,6 @@ const OrderLayout = () => {
           title: "Orders",
         }}
       />
-      {/* <Stack.Screen name="Payment" options={{}} /> */}
     </Stack>
   );
 };
