@@ -1,21 +1,31 @@
 import { Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import api from "../utils/api";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 const CategoryRow = () => {
   const [category, setCategory] = useState([]);
   const [error, setError] = useState("");
-  useEffect(() => {
-    const fetchData = async () => {
-      await api
-        .get("/category")
-        .then((res) => setCategory(res.data.category))
-        .catch((err) => setError(err.message));
-    };
-    fetchData();
-  }, []);
-
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     await api
+  //       .get("/category")
+  //       .then((res) => setCategory(res.data.category))
+  //       .catch((err) => setError(err.message));
+  //   };
+  //   fetchData();
+  // }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        await api
+          .get("/category")
+          .then((res) => setCategory(res.data.category))
+          .catch((err) => setError(err.message));
+      };
+      fetchData();
+    }, [])
+  );
   return (
     <ScrollView
       horizontal

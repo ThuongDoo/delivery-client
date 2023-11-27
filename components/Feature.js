@@ -1,24 +1,26 @@
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 import React, { useEffect, useState } from "react";
 import api from "../utils/api";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { setError } from "../slices/errorSlice";
 import { useDispatch } from "react-redux";
 
 const Feature = () => {
   const [feature, setFeature] = useState([]);
   const dispatch = useDispatch();
-  useEffect(() => {
-    const fetchData = async () => {
-      await api
-        .get("/feature")
-        .then((res) => setFeature(res.data.feature))
-        .catch((err) => {
-          err?.response && dispatch(setError(err.response.status));
-        });
-    };
-    fetchData();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
+        await api
+          .get("/feature")
+          .then((res) => setFeature(res.data.feature))
+          .catch((err) => {
+            err?.response && dispatch(setError(err.response.status));
+          });
+      };
+      fetchData();
+    }, [])
+  );
   return (
     <View className="space-y-10">
       {feature?.map((item) => (

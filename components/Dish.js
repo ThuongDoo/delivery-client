@@ -26,7 +26,7 @@ const Dish = ({ _id, name, image, description, price, quantity, onChange }) => {
     setLoading(false);
   };
   return (
-    <View className="flex-row items-center justify-between gap-2S border-b border-t border-gray-200 h-32 py-3">
+    <View className="flex-row items-center justify-between gap-2S border-b border-t border-gray-200  py-3">
       <View className=" flex-1">
         <Text className="text-lg font-bold">{name}</Text>
         <Text className="break-all">{description}</Text>
