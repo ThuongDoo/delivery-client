@@ -95,7 +95,7 @@ const Basket = () => {
 
     value.forEach((restaurant) => {
       restaurant.items = restaurant.items.filter(
-        (item) => item.isChecked === true
+        (item) => item.isChecked === true && item.quantity !== 0
       );
     });
     value = value.filter((restaurant) => restaurant.items.length !== 0);
@@ -149,7 +149,9 @@ const Basket = () => {
     const totalPrice = basket.reduce((restaurantTotal, restaurantItem) => {
       return (restaurantTotal += restaurantItem.items.reduce((total, item) => {
         if (item.isChecked === true) {
-          return (total += item.quantity * item.food.price);
+          return (total +=
+            item.quantity *
+            (item.food.price * (1 - item.food.discountPercentage)));
         }
         return total;
       }, 0));

@@ -5,7 +5,16 @@ import { Entypo } from "@expo/vector-icons";
 import CurrencyFormatter from "./CurrencyFormatter";
 import { iconColor } from "../utils/constants";
 
-const Dish = ({ _id, name, image, description, price, quantity, onChange }) => {
+const Dish = ({
+  _id,
+  name,
+  image,
+  description,
+  price,
+  quantity,
+  onChange,
+  discountPercentage,
+}) => {
   const [loading, setLoading] = useState(false);
   const addItemToBasket = () => {
     if (loading) {
@@ -30,9 +39,21 @@ const Dish = ({ _id, name, image, description, price, quantity, onChange }) => {
       <View className=" flex-1">
         <Text className="text-lg font-bold">{name}</Text>
         <Text className="break-all">{description}</Text>
-        <Text className="font-bold text-red-500 text-lg">
-          {CurrencyFormatter({ amount: price })}
-        </Text>
+        <View className="flex-row items-center">
+          <Text className="font-bold text-red-500 text-lg">
+            {CurrencyFormatter({ amount: price * (1 - discountPercentage) })}
+          </Text>
+          {discountPercentage !== 0 && (
+            <View className="flex-row items-center">
+              <Text className="text-red-500 text-lg mb-2 mx-1 font-bold">
+                -{discountPercentage * 100}%
+              </Text>
+              <Text className="line-through">
+                {CurrencyFormatter({ amount: price })}
+              </Text>
+            </View>
+          )}
+        </View>
         <View className="flex-row justify-between w-20 items-center">
           <TouchableOpacity
             disabled={quantity <= 0}

@@ -10,6 +10,7 @@ const BasketIcon = ({ data, reset }) => {
   const user = useSelector(getUser);
   const [basketQuantity, setBasketQuantity] = useState(0);
   const [basketTotalPrice, setBasketTotalPrice] = useState(0);
+  console.log(data);
   useEffect(() => {
     const updateQuantity = data.reduce((total, item) => {
       return (total += item.quantity);
@@ -18,7 +19,8 @@ const BasketIcon = ({ data, reset }) => {
   }, [data]);
   useEffect(() => {
     const updateTotalPrice = data.reduce((total, item) => {
-      return (total += item.quantity * item.price);
+      return (total +=
+        item.quantity * (item.price * (1 - item.discountPercentage)));
     }, 0);
     setBasketTotalPrice(updateTotalPrice);
   }, [data]);

@@ -66,7 +66,9 @@ const BasketRow = ({ data, userId, itemDelete, onChange }) => {
       <View className="flex-1">
         <Text className="text-lg font-bold">{data.food.name}</Text>
         <Text className="font-bold text-red-500 text-lg">
-          {CurrencyFormatter({ amount: data.food.price })}
+          {CurrencyFormatter({
+            amount: data.food.price * (1 - data.food.discountPercentage),
+          })}
         </Text>
         <View className="flex-row justify-between w-20 items-center">
           <TouchableOpacity disabled={quantity <= 0} onPress={removeFromBasket}>

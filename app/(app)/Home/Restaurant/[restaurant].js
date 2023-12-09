@@ -37,6 +37,7 @@ const Restaurant = () => {
               description: item.description,
               price: item.price,
               quantity: 0,
+              discountPercentage: item.discountPercentage || 0,
             }));
             setItems(foodItem);
             setIsDataLoaded(true);
@@ -49,6 +50,7 @@ const Restaurant = () => {
       fetchData();
     }, [local.restaurant])
   );
+  console.log(items);
   const onChange = (value) => {
     if (isDataLoaded) {
       const UpdateItems = items.map((item) => {
@@ -164,6 +166,7 @@ const Restaurant = () => {
                   price={item.price}
                   onChange={onChange}
                   quantity={item.quantity}
+                  discountPercentage={item.discountPercentage}
                 />
               ))}
             </View>

@@ -6,7 +6,7 @@ import { router } from "expo-router";
 const RestaurantCard = ({ data }) => {
   return (
     <TouchableOpacity
-      className="flex-row space-x-3 px-2 py-2"
+      className="flex-row space-x-3 px-2 py-2 items-center"
       onPress={() => {
         router.push({
           pathname: "/Home/Restaurant/[restaurant]",

@@ -18,7 +18,7 @@ const index = () => {
   });
   return (
     <Formik
-      initialValues={{ email: "", password: "123456" }}
+      initialValues={{ email: "", password: "" }}
       validationSchema={validationSchema}
       onSubmit={async (values) => {
         await api.post("/auth/login", values).catch((err) => {

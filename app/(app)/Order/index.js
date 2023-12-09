@@ -278,10 +278,13 @@ const OrderModal = ({ isVisible, onClose, orderId, onChange }) => {
                 <View className=" flex-1">
                   <Text className="text-lg font-bold">{item.food?.name}</Text>
                   <Text className="font-bold text-red-500 text-lg">
-                    {CurrencyFormatter({ amount: item?.food?.price })}
+                    {CurrencyFormatter({
+                      amount:
+                        item?.food?.price * (1 - item.food.discountPercentage),
+                    })}
                   </Text>
                   <View className="flex-row justify-between w-20 items-center">
-                    <Text>{item.quantity}</Text>
+                    <Text>quantity: {item.quantity}</Text>
                   </View>
                 </View>
                 <View className="">
